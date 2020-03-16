@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>MyBatis中批量插入支持MySQL和ORACLE | H&amp;Y&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="问题描述在项目中，ORM使用的是MyBatis，而数据库则是同时使用MySQL和Oracle业务开发中需要进行批量的数据入库，需要有一个通用的方式支持MySQL和Oracle现有的操作方式只支持MySQL而不支持Oracle">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MyBatis中批量插入支持MySQL和ORACLE">
+<meta property="og:url" content="http://puras.cn/2013/08/22/mybatis-batch-insert-support-both-mysql-and-oracle/index.html">
+<meta property="og:site_name" content="H&amp;Y&#39;s Blog">
+<meta property="og:description" content="问题描述在项目中，ORM使用的是MyBatis，而数据库则是同时使用MySQL和Oracle业务开发中需要进行批量的数据入库，需要有一个通用的方式支持MySQL和Oracle现有的操作方式只支持MySQL而不支持Oracle">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2013-08-22T03:16:00.000Z">
+<meta property="article:modified_time" content="2020-03-16T13:39:32.197Z">
+<meta property="article:author" content="Puras.He">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="MyBatis">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="H&amp;Y&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">H&amp;Y&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">记录H&amp;Y所有一切的博客，包括生活、技术、学习、情感和所有的所有……</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://puras.cn"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-mybatis-batch-insert-support-both-mysql-and-oracle" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2013/08/22/mybatis-batch-insert-support-both-mysql-and-oracle/" class="article-date">
+  <time datetime="2013-08-22T03:16:00.000Z" itemprop="datePublished">2013-08-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Java/">Java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MyBatis中批量插入支持MySQL和ORACLE
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在项目中，ORM使用的是MyBatis，而数据库则是同时使用MySQL和Oracle<br>业务开发中需要进行批量的数据入库，需要有一个通用的方式支持MySQL和Oracle<br>现有的操作方式只支持MySQL而不支持Oracle </p>
+<a id="more"></a> 
+
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>现有的操作方式，是通过在XML中拼接SQL语句的方式解决<br>但是拼接出来的SQL语句，只能在MySQL中执行，Oracle无法正常执行  </p>
+<pre><code>&lt;insert id=&quot;create&quot; parameterType=&quot;java.util.List&quot;&gt;
+    INSERT INTO GSG_KERNEL_GMSISDN_TAB (STARTMS,ENDMS,AREACODE)
+    VALUES 
+    &lt;foreach collection=&quot;list&quot; item=&quot;item&quot; index=&quot;index&quot; separator=&quot;,&quot;&gt;
+    (#{startMs}, #{endMs}, #{areaCode})
+    &lt;/foreach&gt;
+&lt;/insert&gt;</code></pre><p>原因是上面代码生成的SQL语句，在Oracle中是无效的<br>所以这种方式不能支持两个数据库  </p>
+<p>针对Oracle，使用UNION ALL修改成一份可以执行的SQL，代码如下：</p>
+<pre><code>&lt;insert id=&quot;create&quot; parameterType=&quot;java.util.List&quot;&gt;
+    INSERT INTO GSG_KERNEL_GMSISDN_TAB (STARTMS,ENDMS,AREACODE)
+    &lt;foreach collection=&quot;list&quot; item=&quot;item&quot; index=&quot;index&quot; separator=&quot; UNION ALL &quot;&gt;
+    SELECT #{item.startMs,jdbcType=VARCHAR},#{item.endMs,jdbcType=VARCHAR},#{item.areaCode,jdbcType=VARCHAR} FROM DUAL
+    &lt;/foreach&gt;
+&lt;/insert&gt;</code></pre><p>修改成上面的代码，便可以在Oracle中执行了  </p>
+<p>但是，这样来解决批理入库，有两个问题：</p>
+<blockquote>
+<ol>
+<li>针对MySQL和Oracle两种数据库，需要写两份SQL语句  </li>
+<li>性能很差，10万条数据，入库需要大概100秒以上  </li>
+</ol>
+</blockquote>
+<p>要解决这两个问题，光靠使用XML配置，已经无法解决了  </p>
+<p>既然无法通过XML配置解决，那就需要使用JAVA API了<br>在MyBatis中，执行可以分三种类型ExecutorType：  </p>
+<blockquote>
+<ol>
+<li>SIMPLE<br>这个类型不做特殊的事情，它只为每个语句创建一个PreparedStatement  </li>
+<li>REUSE<br>这种类型将重复使用PreparedStatements  </li>
+<li>BATCH<br>这个类型进行批量操作  </li>
+</ol>
+</blockquote>
+<p>进行批量操作时，只需要将类型设置为BATCH就可以了<br>具体的代码，可以参见下一节，问题解决方法  </p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>通过Java API的方式去执行批量插入操作，<br>工具类代码如下：</p>
+<pre><code>/*******************************************************************************
+ * @(#)MyBatisBatchSupport.java 2013年8月21日
+ *
+ *******************************************************************************/
+package com.neusoft.mooko.core.persistence;
+
+import java.lang.reflect.Method;
+import java.util.List;
+
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
+/**
+ * MyBatis中批量处理的操作类
+ * 目前只实现了批量插入
+ * 
+ * 由于使用XML来拼接SQL的效率太差
+ * 所以使用Java API的方式来解决这个问题
+ * 
+ * @author &lt;a href=&quot;mailto:puras@mooko.net&quot;&gt;Puras.He&lt;/a&gt;
+ * @version $Revision 1.0 $ 2013年8月21日 上午9:56:58
+ */
+public class MyBatisBatchSupport {
+
+    /**
+     * 批量插入
+     * 
+     * @param sqlSessionFactory
+     * @param statement 在Mapper文件中定义的namespce加上Mapper中定义的标识符
+     * @param objList 要入库的数据列表
+     */
+    public static void batchInsert(SqlSessionFactory sqlSessionFactory, String statement, List&lt;?&gt; objList) {
+        SqlSession session = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+
+        try {
+            for (Object obj : objList) {
+                session.insert(statement, obj);
+            }
+            session.flushStatements();
+            session.commit();
+            session.clearCache();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            session.rollback();
+        } finally {
+            session.close();
+        }
+    }
+
+    /**
+     * 批量插入
+     * @param sqlSessionFactory
+     * @param mapperClass 要使用的Mapper的Class
+     * @param pojoClass 列表中POJO对象的Class
+     * @param methodName 要执行的Mapper类中的方法名
+     * @param objList 要入库的数据列表
+     */
+    @SuppressWarnings({ &quot;rawtypes&quot;, &quot;unchecked&quot; })
+    public static &lt;T&gt; void batchInsertByMapper(SqlSessionFactory sqlSessionFactory, Class&lt;?&gt; mapperClass, Class pojoClass, String methodName, List&lt;?&gt; objList) {
+        SqlSession session = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+
+        Class[] paramTypes = new Class[1];
+        T mapper = (T) session.getMapper(mapperClass);
+        try {
+            paramTypes[0] = Class.forName(pojoClass.getName());
+            Method method = mapperClass.getMethod(methodName, paramTypes);
+            for (Object obj : objList) {
+                method.invoke(mapper, obj);
+            }
+            session.flushStatements();
+            session.commit();
+            session.clearCache();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            session.rollback();
+        } finally {
+            session.close();
+        }
+    }
+}</code></pre><p>调用代码，是一个Controller，可快速查看结果：</p>
+<pre><code>@RequestMapping(&quot;batch_insert/{num}&quot;)
+public String batchInsert(ModelMap model, @PathVariable Integer num) {
+    List&lt;Test&gt; ts = new ArrayList&lt;Test&gt;();
+    if (null == num || num == 0) num = 1;
+    System.out.println(&quot;Number-&gt;&gt;&gt;&gt;&gt;&quot; + num);
+    for (int i = 0;i &lt; num; i++) {
+        Test t = new Test();
+        t.setStartMs(&quot;&quot; + i);
+        t.setEndMs(&quot;1&quot;);
+        t.setAreaCode(&quot;1&quot;);
+        ts.add(t);
+    }
+    Long start = System.currentTimeMillis();
+    // 使用Statement方式
+    MyBatisBatchSupport.batchInsert(sqlSessionFactory, &quot;com.neusoft.mooko.auth.persistence.shared.TestDao.create2&quot;, ts);
+    // 使用Mapper方式
+    MyBatisBatchSupport.batchInsertByMapper(sqlSessionFactory, TestDao.class, Test.class, &quot;create2&quot;, ts);
+    Long end = System.currentTimeMillis();
+
+    System.out.println(&quot;Time =======&gt; &quot; + (end - start));
+
+    model.addAttribute(&quot;useTime&quot;, (end - start));
+    return &quot;batch_insert&quot;;
+}</code></pre><p>其中，</p>
+<ul>
+<li>SqlSessionFactory是MyBatis中的Session工厂<blockquote>
+<p>一般情况，都是在Spring配置文件中定义的<br>直接注入到类中就可以</p>
+</blockquote>
+</li>
+<li>“com.neusoft.mooko.auth.persistence.shared.TestDao.create2”<blockquote>
+<p>这个是你的Mapper中定义的一个操作语句，不写Mapper的文件名<br>而是使用你在Mapper文件中定义的namespce加上Mapper中定义的标识符<br>内容则是普通的插入单条数据的SQL语句，如</p>
+</blockquote>
+</li>
+</ul>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; 
+ &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+
+&lt;mapper namespace=&quot;com.neusoft.mooko.auth.persistence.shared.TestDao&quot;&gt;
+  &lt;cache /&gt;
+  &lt;insert id=&quot;create2&quot; parameterType=&quot;Test&quot;&gt;
+    INSERT INTO GSG_KERNEL_GMSISDN_TAB (STARTMS, ENDMS, AREACODE)
+    values
+    (#{startMs}, #{endMs}, #{areaCode})
+  &lt;/insert&gt;
+&lt;/mapper&gt;</code></pre><ul>
+<li>参数<blockquote>
+<p>要执行批量操作的数据参数</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="执行效率"><a href="#执行效率" class="headerlink" title="执行效率"></a>执行效率</h3><p>在工作电脑上执行的数据，每次执行的时间不一样，大致相差不多：</p>
+<ul>
+<li>100条：用时 22 毫秒</li>
+<li>1000条：用时 31 毫秒</li>
+<li>10000条：用时 226 毫秒</li>
+<li>100000条：用时 2423 毫秒</li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>通过Batch方式去执行批量操作，有一个问题，<br>那就是在Insert操作时，事务提交之前，是没有办法获取到自增的id，<br>这在某型情形下是不符合业务要求的。  </p>
+<p>由于上面的这个问题，导致在写MyBatis的XML配置时，也需要注意，<br>不能在INSERT语句的XML中，使用useGeneratedKeys=”true”这个属性<br>下面的代码是无法正常使用Batch方式的:</p>
+<pre><code>&lt;insert id=&quot;create2&quot; useGeneratedKeys=&quot;true&quot; parameterType=&quot;Test&quot;&gt;
+
+    INSERT INTO GSG_KERNEL_GMSISDN_TAB (STARTMS, ENDMS, AREACODE)
+    values
+    (#{startMs}, #{endMs}, #{areaCode})
+&lt;/insert&gt;</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2013/08/22/mybatis-batch-insert-support-both-mysql-and-oracle/" data-id="ck7uk7flz000czk9b6qaxbpgm" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2013/09/16/use-poi-and-itext-convert-excel-to-pdf/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          使用POI和iText将Excel转换成PDF
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2013/08/21/python-read-and-write-excel-with-xlrd-and-xlwt/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python中使用XLRD和XLWT来读写Excel文件</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/">八小时外</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%84%9F%E6%83%85/">感情</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%9D%82%E9%A1%B9/">杂项</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Mac-OS/">Mac OS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Nginx/">Nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Other/">Other</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/">PHP</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/CodeIgniter/">CodeIgniter</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Python/">Python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/iOS/">iOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E5%B7%A5%E5%85%B7/">工具</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodeIgniter/" rel="tag">CodeIgniter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/" rel="tag">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Flask/" rel="tag">Flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gunicorn/" rel="tag">Gunicorn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PDF/" rel="tag">PDF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/" rel="tag">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/POI/" rel="tag">POI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RCP/" rel="tag">RCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RVM/" rel="tag">RVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ruby/" rel="tag">Ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Supervisor/" rel="tag">Supervisor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iText/" rel="tag">iText</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lxml/" rel="tag">lxml</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/qrcode/" rel="tag">qrcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uWSGI/" rel="tag">uWSGI</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CodeIgniter/" style="font-size: 10px;">CodeIgniter</a> <a href="/tags/Eclipse/" style="font-size: 15px;">Eclipse</a> <a href="/tags/Excel/" style="font-size: 12.5px;">Excel</a> <a href="/tags/Flask/" style="font-size: 12.5px;">Flask</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Gunicorn/" style="font-size: 10px;">Gunicorn</a> <a href="/tags/Inset/" style="font-size: 10px;">Inset</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Mac-OS/" style="font-size: 17.5px;">Mac OS</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/Nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/PDF/" style="font-size: 10px;">PDF</a> <a href="/tags/PHP/" style="font-size: 10px;">PHP</a> <a href="/tags/POI/" style="font-size: 10px;">POI</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/RCP/" style="font-size: 10px;">RCP</a> <a href="/tags/RVM/" style="font-size: 10px;">RVM</a> <a href="/tags/Ruby/" style="font-size: 10px;">Ruby</a> <a href="/tags/Supervisor/" style="font-size: 10px;">Supervisor</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/Ubuntu/" style="font-size: 10px;">Ubuntu</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iText/" style="font-size: 10px;">iText</a> <a href="/tags/lxml/" style="font-size: 10px;">lxml</a> <a href="/tags/qrcode/" style="font-size: 10px;">qrcode</a> <a href="/tags/uWSGI/" style="font-size: 10px;">uWSGI</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">二月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">一月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">十二月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">十一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">十一月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">九月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/08/">八月 2013</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">一起用Docker之搭建Java开发环境</a>
+          </li>
+        
+          <li>
+            <a href="/2015/04/14/ios8-uitableview-separator-inset-0-not-working/">iOS8下UITableView的分隔线Inset为0不起作用</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/28/mac-install-pil-and-qrcode/">mac install pil and qrcode</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/13/can-not-load-mysql-python-in-virtualenv/">can not load mysql-python in virtualenv</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/11/mac-os-install-lxml/">MacOS下安装LXML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 Puras.He<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

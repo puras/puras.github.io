@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>iOS8下UITableView的分隔线Inset为0不起作用 | H&amp;Y&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在使用UITableView的时候，两个Cell之间的分隔线，左边没有到头，而是空了一小段，从网上找到了解决办法却不生效，最后从StackOverflow上找到了可用的解决办法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS8下UITableView的分隔线Inset为0不起作用">
+<meta property="og:url" content="http://puras.cn/2015/04/14/ios8-uitableview-separator-inset-0-not-working/index.html">
+<meta property="og:site_name" content="H&amp;Y&#39;s Blog">
+<meta property="og:description" content="在使用UITableView的时候，两个Cell之间的分隔线，左边没有到头，而是空了一小段，从网上找到了解决办法却不生效，最后从StackOverflow上找到了可用的解决办法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-04-14T15:39:48.000Z">
+<meta property="article:modified_time" content="2020-03-16T13:39:32.200Z">
+<meta property="article:author" content="Puras.He">
+<meta property="article:tag" content="iOS">
+<meta property="article:tag" content="UITableView">
+<meta property="article:tag" content="Inset">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="H&amp;Y&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">H&amp;Y&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">记录H&amp;Y所有一切的博客，包括生活、技术、学习、情感和所有的所有……</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://puras.cn"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ios8-uitableview-separator-inset-0-not-working" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/04/14/ios8-uitableview-separator-inset-0-not-working/" class="article-date">
+  <time datetime="2015-04-14T15:39:48.000Z" itemprop="datePublished">2015-04-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/iOS/">iOS</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS8下UITableView的分隔线Inset为0不起作用
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在使用UITableView的时候，两个Cell之间的分隔线，左边没有到头，而是空了一小段，从网上找到了解决办法却不生效，最后从StackOverflow上找到了可用的解决办法。</p>
+<a id="more"></a>
+
+<p>大家普遍提供的解决办法是：</p>
+<pre><code>if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
+    [self.tableView setSeparatorInset:UIEdgeInsetsZero];
+}</code></pre><p>但是在iOS8上却不生效，当然，iOS8之前的版本是否生效我也不确认，因为没有试过。</p>
+<p>在网上查了一下解决办法，最后在StackOverflow上找到了可用的解决办法：</p>
+<pre><code>- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
+        [cell setSeparatorInset:UIEdgeInsetsZero];
+    }
+
+    if ([cell respondsToSelector:@selector(setPreservesSuperviewLayoutMargins:)]) {
+        [cell setPreservesSuperviewLayoutMargins:NO];
+    }
+
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
+}</code></pre><p>StackOverflow上的地址是：<a href="http://stackoverflow.com/questions/25770119/ios-8-uitableview-separator-inset-0-not-working" target="_blank" rel="noopener">http://stackoverflow.com/questions/25770119/ios-8-uitableview-separator-inset-0-not-working</a></p>
+<p>记录一下~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2015/04/14/ios8-uitableview-separator-inset-0-not-working/" data-id="ck7uk7fmj001lzk9bbsh82kee" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          一起用Docker之搭建Java开发环境
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/28/mac-install-pil-and-qrcode/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">mac install pil and qrcode</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/">八小时外</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%84%9F%E6%83%85/">感情</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%9D%82%E9%A1%B9/">杂项</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Mac-OS/">Mac OS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Nginx/">Nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Other/">Other</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/">PHP</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/CodeIgniter/">CodeIgniter</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Python/">Python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/iOS/">iOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E5%B7%A5%E5%85%B7/">工具</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodeIgniter/" rel="tag">CodeIgniter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/" rel="tag">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Flask/" rel="tag">Flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gunicorn/" rel="tag">Gunicorn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PDF/" rel="tag">PDF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/" rel="tag">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/POI/" rel="tag">POI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RCP/" rel="tag">RCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RVM/" rel="tag">RVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ruby/" rel="tag">Ruby</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Supervisor/" rel="tag">Supervisor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iText/" rel="tag">iText</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lxml/" rel="tag">lxml</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/qrcode/" rel="tag">qrcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uWSGI/" rel="tag">uWSGI</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CodeIgniter/" style="font-size: 10px;">CodeIgniter</a> <a href="/tags/Eclipse/" style="font-size: 15px;">Eclipse</a> <a href="/tags/Excel/" style="font-size: 12.5px;">Excel</a> <a href="/tags/Flask/" style="font-size: 12.5px;">Flask</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Gunicorn/" style="font-size: 10px;">Gunicorn</a> <a href="/tags/Inset/" style="font-size: 10px;">Inset</a> <a href="/tags/Java/" style="font-size: 12.5px;">Java</a> <a href="/tags/Mac-OS/" style="font-size: 17.5px;">Mac OS</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/Nginx/" style="font-size: 15px;">Nginx</a> <a href="/tags/PDF/" style="font-size: 10px;">PDF</a> <a href="/tags/PHP/" style="font-size: 10px;">PHP</a> <a href="/tags/POI/" style="font-size: 10px;">POI</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/RCP/" style="font-size: 10px;">RCP</a> <a href="/tags/RVM/" style="font-size: 10px;">RVM</a> <a href="/tags/Ruby/" style="font-size: 10px;">Ruby</a> <a href="/tags/Supervisor/" style="font-size: 10px;">Supervisor</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/Ubuntu/" style="font-size: 10px;">Ubuntu</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iText/" style="font-size: 10px;">iText</a> <a href="/tags/lxml/" style="font-size: 10px;">lxml</a> <a href="/tags/qrcode/" style="font-size: 10px;">qrcode</a> <a href="/tags/uWSGI/" style="font-size: 10px;">uWSGI</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">二月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">一月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">十二月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">十一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">十一月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">九月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/08/">八月 2013</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">一起用Docker之搭建Java开发环境</a>
+          </li>
+        
+          <li>
+            <a href="/2015/04/14/ios8-uitableview-separator-inset-0-not-working/">iOS8下UITableView的分隔线Inset为0不起作用</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/28/mac-install-pil-and-qrcode/">mac install pil and qrcode</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/13/can-not-load-mysql-python-in-virtualenv/">can not load mysql-python in virtualenv</a>
+          </li>
+        
+          <li>
+            <a href="/2015/02/11/mac-os-install-lxml/">MacOS下安装LXML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 Puras.He<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
