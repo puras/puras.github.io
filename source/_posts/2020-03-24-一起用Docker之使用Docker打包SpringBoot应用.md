@@ -90,7 +90,21 @@ tags:
 - fabric8io/docker-maven-plugin：功能超级强大，不过使用起来，也有些麻烦，有兴趣的可以试试；
 - spotify/dockerfile-maven-plugin：spotify/docker-maven-plugin的新版本，使用比较方便，自己编写DockerFile，之后可以自动打包、发布。
 
-修改pom.xml配置文件的`plugins`部分：
+## 在项目根目录增加`Dockerfile`文件：
+
+    FROM openjdk:8-jdk-alpine
+    COPY target/*.jar app.jar
+    ENTRYPOINT ["java", "-jar", "/app.jar"]
+    EXPOSE 8080
+
+内容比较简单：
+
+- 使用OpenJdk做基础镜像
+- 将Target下的jar包复制为app.jar
+- 执行命令
+- 暴露端口
+
+## 修改pom.xml配置文件的`plugins`部分：
 
     <plugins>
         <plugin>
