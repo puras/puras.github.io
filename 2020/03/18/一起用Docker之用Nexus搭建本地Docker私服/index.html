@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>一起用Docker之用Nexus搭建本地Docker私有仓库 | H&amp;Y&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="使用Docker的过程中，我们不停的在拉取各种类型的镜像，我们自己制作的镜像，发布到hub.docker.io上，也可以供他们下载了。但是一些内部的镜像，比如说我们开发的Spring Boot的程序，想交给测试同学进行验证，这种情况怎么办呢？也发布到hub.docker.io上么？先不说是否适合，只是hub.docker.io的速度，就够咱们喝一壶的了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一起用Docker之用Nexus搭建本地Docker私有仓库">
+<meta property="og:url" content="http://puras.cn/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/index.html">
+<meta property="og:site_name" content="H&amp;Y&#39;s Blog">
+<meta property="og:description" content="使用Docker的过程中，我们不停的在拉取各种类型的镜像，我们自己制作的镜像，发布到hub.docker.io上，也可以供他们下载了。但是一些内部的镜像，比如说我们开发的Spring Boot的程序，想交给测试同学进行验证，这种情况怎么办呢？也发布到hub.docker.io上么？先不说是否适合，只是hub.docker.io的速度，就够咱们喝一壶的了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://puras.cn/images/docker-repository-select.png">
+<meta property="og:image" content="http://puras.cn/images/docker-repository-create.png">
+<meta property="og:image" content="http://puras.cn/images/docker-run.png">
+<meta property="article:published_time" content="2020-03-18T08:29:52.000Z">
+<meta property="article:modified_time" content="2020-03-22T13:42:45.732Z">
+<meta property="article:author" content="Puras.He">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="Nexus">
+<meta property="article:tag" content="私服">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://puras.cn/images/docker-repository-select.png">
+  
+  
+    <link rel="icon" href="/images/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">H&amp;Y&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">记录H&amp;Y所有一切的博客，包括生活、技术、学习、情感和所有的所有……</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://puras.cn"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-一起用Docker之用Nexus搭建本地Docker私服" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/" class="article-date">
+  <time datetime="2020-03-18T08:29:52.000Z" itemprop="datePublished">2020-03-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E4%B8%80%E8%B5%B7%E7%94%A8Docker/">一起用Docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      一起用Docker之用Nexus搭建本地Docker私有仓库
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>使用Docker的过程中，我们不停的在拉取各种类型的镜像，我们自己制作的镜像，发布到<code>hub.docker.io</code>上，也可以供他们下载了。但是一些内部的镜像，比如说我们开发的Spring Boot的程序，想交给测试同学进行验证，这种情况怎么办呢？也发布到<code>hub.docker.io</code>上么？先不说是否适合，只是<code>hub.docker.io</code>的速度，就够咱们喝一壶的了。</p>
+<a id="more"></a>
+
+<p>今天要说的，是上一篇<a href="http://puras.cn/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/">一起用Docker之搭建开发与测试的依赖环境</a>中提到的Nexus。</p>
+<p>Nexus不仅可以做为Maven的私服使用，也可以做为Docker的私有仓库来使用，这里只做简单的使用介绍，更详细的可以查看<a href="https://help.sonatype.com/repomanager3" target="_blank" rel="noopener">官方介绍</a>。</p>
+<h1 id="创建私有仓库"><a href="#创建私有仓库" class="headerlink" title="创建私有仓库"></a>创建私有仓库</h1><p>登录到Nexus管理界面，通过导航依次选择<code>Repository-&gt;Repositories</code>，在<code>Repositories</code>界面中，选择<code>Create repository</code>，可以看到下面的界面：</p>
+<p><img src="/images/docker-repository-select.png" alt=""></p>
+<p>在其中选择<code>docker(hosted)</code>，可以打开创建页面：</p>
+<p><img src="/images/docker-repository-create.png" alt=""></p>
+<p>在这个界面中设置如下内容：</p>
+<ul>
+<li>设置HTTP端口，比如8082，还记得之前运行Nexus容器时，映射的端口么，8082就用在这了；</li>
+<li><code>Allow anonymous docker pull</code>是否允许匿名Pull；</li>
+<li><code>Allow clients to use the V1 API to interact with this repository</code>允许V1版本的API与该库交互；</li>
+</ul>
+<p>设置完，点保存就可以啦。</p>
+<h1 id="设置Docker"><a href="#设置Docker" class="headerlink" title="设置Docker"></a>设置Docker</h1><p>为了让我们能访问Docker的私服，需要对Docker进行一些设置，修改<code>/etc/docker/daemon.json</code>文件，当然，这个是Linux系统下的，其他的系统，可参考官网给出的位置，增加如下内容：</p>
+<pre><code>&quot;insecure-registries&quot;: [
+   &quot;10.211.55.6:8082&quot;
+ ]</code></pre><p>因为我们搞的私服，是不可靠的，所以需要将服务器的信息，加入到配置文件中，修改完，重启一下服务就好了：</p>
+<pre><code>sudo systemctl daemon-reload
+sudo systemctl restart docker</code></pre><h1 id="登录私有仓库"><a href="#登录私有仓库" class="headerlink" title="登录私有仓库"></a>登录私有仓库</h1><p>之前我们执行<code>docker login</code>命令，是登录的<code>hub.docker.io</code>，但现在我们不登录啦，换成咱们自己的私服：</p>
+<pre><code>docker login ip:port
+输入用户名
+输入密码
+显示登录结果信息</code></pre><p>下面是登录刚搭建的Nexus私服的信息，其中IP是10.211.55.6，端口是8802：</p>
+<pre><code>puras@ubuntu-server:~$ docker login 10.211.55.6:8082
+Username: puras
+Password: 
+Error response from daemon: login attempt to http://10.211.55.6:8082/v2/ failed with status: 401 Unauthorized
+puras@ubuntu-server:~$ docker login 10.211.55.6:8082
+Username: puras
+Password: 
+WARNING! Your password will be stored unencrypted in /home/puras/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded</code></pre><h1 id="发布镜像"><a href="#发布镜像" class="headerlink" title="发布镜像"></a>发布镜像</h1><p>登录到私服之后，就可以进行镜像的Push啦，拿我们之后要讲到的SpringBoot应用来做示例，先查查私服上有没有它：</p>
+<pre><code>docker search 10.211.55.6:8082/spring-boot
+// 应该是啥也没有，因为还没有上传过呢</code></pre><p>再看看本地的镜像：</p>
+<pre><code>puras@puras-macbook:~$ docker image list
+REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
+puras/docker-spring-boot   0.1.0               ad0a319215d0        23 hours ago        122MB
+redis                      5                   f0453552d7f2        5 days ago          98.2MB
+mysql                      5.7                 84164b03fa2e        2 weeks ago         456MB
+nginx                      1.16                8c5ec390a315        3 weeks ago         127MB
+openjdk                    8-jdk-alpine        a3562aa0b991        10 months ago       105MB</code></pre><p>嗯，其中的puras/docker-spring-boot就是我们今天要Push的对象啦，先给它做一个Tag，需要将私服的地址加上的：</p>
+<pre><code>docker tag puras/docker-spring-boot:0.1.0 10.211.55.6:8082/docker-spring-boot:0.1.0</code></pre><p>再查看本地的镜像</p>
+<pre><code>puras@puras-macbook:~$ docker image list
+REPOSITORY                            TAG                 IMAGE ID            CREATED             SIZE
+10.211.55.6:8082/docker-spring-boot   0.1.0               ad0a319215d0        23 hours ago        122MB
+puras/docker-spring-boot              0.1.0               ad0a319215d0        23 hours ago        122MB
+redis                                 5                   f0453552d7f2        5 days ago          98.2MB
+mysql                                 5.7                 84164b03fa2e        2 weeks ago         456MB
+nginx                                 1.16                8c5ec390a315        3 weeks ago         127MB
+openjdk                               8-jdk-alpine        a3562aa0b991        10 months ago       105MB</code></pre><p>新的Tag的镜像已经出现了，细心的朋友一定会注意到，两个ImageId是相同的，删除的时候，千万不要使用ImageId，直接使用ImageName就好了，不然同ImageId的镜像会都被删除掉的哦。</p>
+<p>好了，现在将镜像Push到私服上吧：</p>
+<pre><code>docker push 10.211.55.6:8082/docker-spring-boot:0.1.0
+The push refers to repository [10.211.55.6:8082/docker-spring-boot]
+f763aecd8e8d: Pushed
+ceaf9e1ebef5: Pushed
+9b9b7f3d56a0: Pushed
+f1b5933fe4b5: Pushed
+0.1.0: digest: sha256:ec6041935fde6a4b32295af56fc72a8e3c12cf0118e08081db3797fda6a42a59 size: 1159</code></pre><p>再来查看私服里，是否已经有了新的镜像呢：</p>
+<pre><code>puras@puras-macbook:~$ docker search 10.211.55.6:8082/docker-spring-boot:0.1.0
+NAME                                        DESCRIPTION         STARS               OFFICIAL            AUTOMATED
+10.211.55.6:8082/docker-spring-boot:0.1.0</code></pre><p>嗯，已经有了，现在将本地的镜像删除，直接按ImageId删除吧，一个也不要了：</p>
+<pre><code>docker rmi -f ad0a319215d0</code></pre><p>再查看一下：</p>
+<pre><code>puras@puras-macbook:~$ docker image list
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+redis               5                   f0453552d7f2        5 days ago          98.2MB
+mysql               5.7                 84164b03fa2e        2 weeks ago         456MB
+nginx               1.16                8c5ec390a315        3 weeks ago         127MB
+openjdk             8-jdk-alpine        a3562aa0b991        10 months ago       105MB</code></pre><p>没有了，现在从私服同步一个刚刚上传的镜像：</p>
+<pre><code>docker pull 10.211.55.6:8082/docker-spring-boot:0.1.0</code></pre><p>运行新同步的镜像：</p>
+<pre><code>docker run -p 8080:8080 10.211.55.6:8082/docker-spring-boot:0.1.0</code></pre><p>然后打开浏览器，看看执行的效果：</p>
+<p><img src="/images/docker-run.png" alt=""></p>
+<p>OK，至此私服已经可用了。</p>
+<p>推荐的理由：</p>
+<ul>
+<li>有了自己的私服，发布和拉取，保证隐私的情况下还会很方便</li>
+<li>开发将完整的应用做成镜像，测试直接拉取运行便可，只需要有一个Docker环境就好了，不需要其他的环境</li>
+</ul>
+<p>PS：一步步走向开发测试使用Docker环境大统一的方向<del>~</del></p>
+<hr>
+<p>一点小小的想法，希望能对大家有用。</p>
+<p>Over<del>~</del></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/" data-id="ck861c3iq0000g89b91acb3ta" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%A7%81%E6%9C%8D/" rel="tag">私服</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          一起用Docker之使用Docker打包SpringBoot应用
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">一起用Docker之搭建开发与测试的依赖环境</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/">八小时外</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%84%9F%E6%83%85/">感情</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%85%AB%E5%B0%8F%E6%97%B6%E5%A4%96/%E6%9D%82%E9%A1%B9/">杂项</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Mac-OS/">Mac OS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Nginx/">Nginx</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Other/">Other</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/">PHP</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/PHP/CodeIgniter/">CodeIgniter</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Python/">Python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/iOS/">iOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E4%B8%80%E8%B5%B7%E7%94%A8Docker/">一起用Docker</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E5%B7%A5%E5%85%B7/">工具</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodeIgniter/" rel="tag">CodeIgniter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/" rel="tag">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Flask/" rel="tag">Flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/" rel="tag">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gunicorn/" rel="tag">Gunicorn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PDF/" rel="tag">PDF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/" rel="tag">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/POI/" rel="tag">POI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RCP/" rel="tag">RCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Supervisor/" rel="tag">Supervisor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iText/" rel="tag">iText</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lxml/" rel="tag">lxml</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uWSGI/" rel="tag">uWSGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="tag">开发环境</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83/" rel="tag">测试环境</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%81%E6%9C%8D/" rel="tag">私服</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CodeIgniter/" style="font-size: 10px;">CodeIgniter</a> <a href="/tags/Docker/" style="font-size: 20px;">Docker</a> <a href="/tags/Eclipse/" style="font-size: 16.67px;">Eclipse</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/Flask/" style="font-size: 13.33px;">Flask</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Gitlab/" style="font-size: 10px;">Gitlab</a> <a href="/tags/Gunicorn/" style="font-size: 10px;">Gunicorn</a> <a href="/tags/Inset/" style="font-size: 10px;">Inset</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a> <a href="/tags/Mac-OS/" style="font-size: 20px;">Mac OS</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/Nexus/" style="font-size: 16.67px;">Nexus</a> <a href="/tags/Nginx/" style="font-size: 20px;">Nginx</a> <a href="/tags/PDF/" style="font-size: 10px;">PDF</a> <a href="/tags/PHP/" style="font-size: 10px;">PHP</a> <a href="/tags/POI/" style="font-size: 10px;">POI</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/RCP/" style="font-size: 10px;">RCP</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Supervisor/" style="font-size: 10px;">Supervisor</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/Ubuntu/" style="font-size: 10px;">Ubuntu</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iText/" style="font-size: 10px;">iText</a> <a href="/tags/lxml/" style="font-size: 10px;">lxml</a> <a href="/tags/uWSGI/" style="font-size: 10px;">uWSGI</a> <a href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" style="font-size: 13.33px;">开发环境</a> <a href="/tags/%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83/" style="font-size: 10px;">测试环境</a> <a href="/tags/%E7%A7%81%E6%9C%8D/" style="font-size: 13.33px;">私服</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/04/">四月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">二月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">一月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">十二月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">十一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/01/">一月 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">十一月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">九月 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/08/">八月 2013</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/">一起用Docker之使用Docker打包SpringBoot应用</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/">一起用Docker之用Nexus搭建本地Docker私有仓库</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/">一起用Docker之搭建开发与测试的依赖环境</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/">一起用Docker之搭建开发环境相关服务</a>
+          </li>
+        
+          <li>
+            <a href="/2015/04/14/ios8-uitableview-separator-inset-0-not-working/">iOS8下UITableView的分隔线Inset为0不起作用</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 Puras.He<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="/js/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

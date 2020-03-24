@@ -64,9 +64,150 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-一起用Docker之搭建Java开发环境" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-一起用Docker之使用Docker打包SpringBoot应用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" class="article-date">
+    <a href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/" class="article-date">
+  <time datetime="2020-03-24T13:52:41.000Z" itemprop="datePublished">2020-03-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E4%B8%80%E8%B5%B7%E7%94%A8Docker/">一起用Docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/">一起用Docker之使用Docker打包SpringBoot应用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前使用Docker搭建了开发环境的相关服务，同时也搭建开发与测试环境中的依赖服务，再同时也使用Nexus搭建了Docker的私服，那么这次咱们一起来用Docker部署SpringBoot应用。一步一步的向全部Docker化进军。</p>
+        
+          <p class="article-more-link">
+            <a href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/" data-id="ck861ejqr000mg89b6y7i8y9t" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%A7%81%E6%9C%8D/" rel="tag">私服</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-一起用Docker之用Nexus搭建本地Docker私服" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/" class="article-date">
+  <time datetime="2020-03-18T08:29:52.000Z" itemprop="datePublished">2020-03-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E4%B8%80%E8%B5%B7%E7%94%A8Docker/">一起用Docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/">一起用Docker之用Nexus搭建本地Docker私有仓库</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>使用Docker的过程中，我们不停的在拉取各种类型的镜像，我们自己制作的镜像，发布到<code>hub.docker.io</code>上，也可以供他们下载了。但是一些内部的镜像，比如说我们开发的Spring Boot的程序，想交给测试同学进行验证，这种情况怎么办呢？也发布到<code>hub.docker.io</code>上么？先不说是否适合，只是<code>hub.docker.io</code>的速度，就够咱们喝一壶的了。</p>
+        
+          <p class="article-more-link">
+            <a href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/" data-id="ck861c3iq0000g89b91acb3ta" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%A7%81%E6%9C%8D/" rel="tag">私服</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-一起用Docker之搭建开发与测试的依赖环境" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/" class="article-date">
+  <time datetime="2020-03-17T13:01:04.000Z" itemprop="datePublished">2020-03-17</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E4%B8%80%E8%B5%B7%E7%94%A8Docker/">一起用Docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/">一起用Docker之搭建开发与测试的依赖环境</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>搭建了本机的开发环境之后，Docker在其他方面是否还能提升我们的效率呢？这一篇，咱们来讲讲用Docker搭建在开发和测试的过程中，需要的依赖服务的环境，如<code>Nexus</code>、<code>Jenkins</code>和<code>Gitlab</code>，其实还有<code>MySQL</code>、<code>Nginx</code>等，这些内容，可以从<a href="http://puras.cn/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">一起用Docker之搭建开发环境相关服务</a>里查看，就不再重复假装字数很多了。</p>
+        
+          <p class="article-more-link">
+            <a href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://puras.cn/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/" data-id="ck7w0hqvx00008m9b56kb84ar" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gitlab/" rel="tag">Gitlab</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="tag">开发环境</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83/" rel="tag">测试环境</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-一起用Docker之搭建开发环境相关服务" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/" class="article-date">
   <time datetime="2020-03-16T14:10:10.000Z" itemprop="datePublished">2020-03-16</time>
 </a>
     
@@ -82,7 +223,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">一起用Docker之搭建Java开发环境</a>
+      <a class="article-title" href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/">一起用Docker之搭建开发环境相关服务</a>
     </h1>
   
 
@@ -90,14 +231,24 @@
     
     <div class="article-entry" itemprop="articleBody">
       
+        <p>如果你现在拿到一台新的工作电脑，第一步要做的是什么？是不是要安装各种软件，进行开发环境的搭建？</p>
+<p>在日常的工作中，你是否会遇到下面的场景：</p>
+<pre><code>测试：你的SQL脚本，在测试环境中执行不了。
+开发：不可能的啊，在我机器上是好用的啊，你的MySQL是什么版本
+测试：测试环境的MySQL版本是5.7
+开发：啊，我本地的版本是5.6……</code></pre><p>那么有什么好的办法能快速的解决开发环境的问题？且能与测试环境保持同样的版本？或是在同测试环境版本不同的时候，能快速的更新自己的开发环境呢？</p>
+        
+          <p class="article-more-link">
+            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/#more">Read More</a>
+          </p>
         
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://puras.cn/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" data-id="ck7uk7fmk001nzk9bg0r7d3eu" class="article-share-link">Share</a>
+      <a data-url="http://puras.cn/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/" data-id="ck861c3jc000eg89b8rk90htq" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/" rel="tag">Java</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="tag">开发环境</a></li></ul>
 
     </footer>
   </div>
@@ -390,155 +541,11 @@
 
 
   
-    <article id="post-eclipse-can-not-start" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/11/27/eclipse-can-not-start/" class="article-date">
-  <time datetime="2014-11-27T06:04:23.000Z" itemprop="datePublished">2014-11-27</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E5%B7%A5%E5%85%B7/">工具</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/11/27/eclipse-can-not-start/">Eclipse无法启动之解决办法</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>今天在使用Eclipse的时候，启了一下Debug，结果Eclipse就死在那了，强制关掉之后，Eclipse则无法正常启动，卡在启动界面上无响应。</p>
-<p>重启，强制关闭，都不行……</p>
-        
-          <p class="article-more-link">
-            <a href="/2014/11/27/eclipse-can-not-start/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://puras.cn/2014/11/27/eclipse-can-not-start/" data-id="ck7uk7fm8000ozk9b28gq53l2" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-nginx-compile-and-install-problem" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/11/26/nginx-compile-and-install-problem/" class="article-date">
-  <time datetime="2014-11-26T01:14:58.000Z" itemprop="datePublished">2014-11-26</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/Nginx/">Nginx</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/11/26/nginx-compile-and-install-problem/">Ubuntu下Nginx编译与安装过程中的问题及解决</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>安装过多次了，但每次遇到这些问题都需要去Google，之后便记不得了。虽然每次都可以解决，但还是记下来的比较好，以后再安装，也可以回来查一下。</p>
-<p>本文主要记录PCRE和zlib库的安装问题。</p>
-        
-          <p class="article-more-link">
-            <a href="/2014/11/26/nginx-compile-and-install-problem/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://puras.cn/2014/11/26/nginx-compile-and-install-problem/" data-id="ck7uk7fm6000mzk9b1g6zgoz8" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-mac-os-10-dot-9-run-eclipse-3-dot-7-error" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/01/12/mac-os-10-dot-9-run-eclipse-3-dot-7-error/" class="article-date">
-  <time datetime="2014-01-11T16:13:00.000Z" itemprop="datePublished">2014-01-12</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/">技海拾贝</a>►<a class="article-category-link" href="/categories/%E6%8A%80%E6%B5%B7%E6%8B%BE%E8%B4%9D/%E5%B7%A5%E5%85%B7/">工具</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/01/12/mac-os-10-dot-9-run-eclipse-3-dot-7-error/">MacOS10.9上执行Eclipse3.7报错</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在Mac OS升级到10.9之后<br>使用Eclipse3.7时会报错误</p>
-<pre><code>Failed to create the Java Virtual Machine</code></pre>
-        
-          <p class="article-more-link">
-            <a href="/2014/01/12/mac-os-10-dot-9-run-eclipse-3-dot-7-error/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://puras.cn/2014/01/12/mac-os-10-dot-9-run-eclipse-3-dot-7-error/" data-id="ck7uk7fm3000izk9bh5f77b6s" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页 &amp;raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">下一页 &amp;raquo;</a>
   </nav>
 
 </section>
@@ -559,7 +566,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodeIgniter/" rel="tag">CodeIgniter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/" rel="tag">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Flask/" rel="tag">Flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gunicorn/" rel="tag">Gunicorn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PDF/" rel="tag">PDF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/" rel="tag">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/POI/" rel="tag">POI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RCP/" rel="tag">RCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Supervisor/" rel="tag">Supervisor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iText/" rel="tag">iText</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lxml/" rel="tag">lxml</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uWSGI/" rel="tag">uWSGI</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodeIgniter/" rel="tag">CodeIgniter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Eclipse/" rel="tag">Eclipse</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Excel/" rel="tag">Excel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Flask/" rel="tag">Flask</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github/" rel="tag">Github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gitlab/" rel="tag">Gitlab</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gunicorn/" rel="tag">Gunicorn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Inset/" rel="tag">Inset</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/" rel="tag">Java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mac-OS/" rel="tag">Mac OS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MyBatis/" rel="tag">MyBatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MySQL/" rel="tag">MySQL</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nexus/" rel="tag">Nexus</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PDF/" rel="tag">PDF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PHP/" rel="tag">PHP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/POI/" rel="tag">POI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RCP/" rel="tag">RCP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Supervisor/" rel="tag">Supervisor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/" rel="tag">UITableView</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/" rel="tag">iOS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iText/" rel="tag">iText</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lxml/" rel="tag">lxml</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uWSGI/" rel="tag">uWSGI</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" rel="tag">开发环境</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83/" rel="tag">测试环境</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%A7%81%E6%9C%8D/" rel="tag">私服</a></li></ul>
     </div>
   </div>
 
@@ -569,7 +576,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/CodeIgniter/" style="font-size: 10px;">CodeIgniter</a> <a href="/tags/Docker/" style="font-size: 10px;">Docker</a> <a href="/tags/Eclipse/" style="font-size: 16.67px;">Eclipse</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/Flask/" style="font-size: 13.33px;">Flask</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Gunicorn/" style="font-size: 10px;">Gunicorn</a> <a href="/tags/Inset/" style="font-size: 10px;">Inset</a> <a href="/tags/Java/" style="font-size: 16.67px;">Java</a> <a href="/tags/Mac-OS/" style="font-size: 20px;">Mac OS</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/Nginx/" style="font-size: 16.67px;">Nginx</a> <a href="/tags/PDF/" style="font-size: 10px;">PDF</a> <a href="/tags/PHP/" style="font-size: 10px;">PHP</a> <a href="/tags/POI/" style="font-size: 10px;">POI</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/RCP/" style="font-size: 10px;">RCP</a> <a href="/tags/Supervisor/" style="font-size: 10px;">Supervisor</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/Ubuntu/" style="font-size: 10px;">Ubuntu</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iText/" style="font-size: 10px;">iText</a> <a href="/tags/lxml/" style="font-size: 10px;">lxml</a> <a href="/tags/uWSGI/" style="font-size: 10px;">uWSGI</a>
+      <a href="/tags/CodeIgniter/" style="font-size: 10px;">CodeIgniter</a> <a href="/tags/Docker/" style="font-size: 20px;">Docker</a> <a href="/tags/Eclipse/" style="font-size: 16.67px;">Eclipse</a> <a href="/tags/Excel/" style="font-size: 10px;">Excel</a> <a href="/tags/Flask/" style="font-size: 13.33px;">Flask</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Gitlab/" style="font-size: 10px;">Gitlab</a> <a href="/tags/Gunicorn/" style="font-size: 10px;">Gunicorn</a> <a href="/tags/Inset/" style="font-size: 10px;">Inset</a> <a href="/tags/Java/" style="font-size: 13.33px;">Java</a> <a href="/tags/Jenkins/" style="font-size: 10px;">Jenkins</a> <a href="/tags/Mac-OS/" style="font-size: 20px;">Mac OS</a> <a href="/tags/MyBatis/" style="font-size: 10px;">MyBatis</a> <a href="/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/tags/Nexus/" style="font-size: 16.67px;">Nexus</a> <a href="/tags/Nginx/" style="font-size: 20px;">Nginx</a> <a href="/tags/PDF/" style="font-size: 10px;">PDF</a> <a href="/tags/PHP/" style="font-size: 10px;">PHP</a> <a href="/tags/POI/" style="font-size: 10px;">POI</a> <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/RCP/" style="font-size: 10px;">RCP</a> <a href="/tags/Redis/" style="font-size: 10px;">Redis</a> <a href="/tags/Supervisor/" style="font-size: 10px;">Supervisor</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/Ubuntu/" style="font-size: 10px;">Ubuntu</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/iText/" style="font-size: 10px;">iText</a> <a href="/tags/lxml/" style="font-size: 10px;">lxml</a> <a href="/tags/uWSGI/" style="font-size: 10px;">uWSGI</a> <a href="/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" style="font-size: 13.33px;">开发环境</a> <a href="/tags/%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83/" style="font-size: 10px;">测试环境</a> <a href="/tags/%E7%A7%81%E6%9C%8D/" style="font-size: 13.33px;">私服</a>
     </div>
   </div>
 
@@ -591,23 +598,23 @@
       <ul>
         
           <li>
-            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BAJava%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">一起用Docker之搭建Java开发环境</a>
+            <a href="/2020/03/24/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E4%BD%BF%E7%94%A8Docker%E6%89%93%E5%8C%85SpringBoot%E5%BA%94%E7%94%A8/">一起用Docker之使用Docker打包SpringBoot应用</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/18/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E7%94%A8Nexus%E6%90%AD%E5%BB%BA%E6%9C%AC%E5%9C%B0Docker%E7%A7%81%E6%9C%8D/">一起用Docker之用Nexus搭建本地Docker私有仓库</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%9A%84%E4%BE%9D%E8%B5%96%E7%8E%AF%E5%A2%83/">一起用Docker之搭建开发与测试的依赖环境</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/16/%E4%B8%80%E8%B5%B7%E7%94%A8Docker%E4%B9%8B%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3%E6%9C%8D%E5%8A%A1/">一起用Docker之搭建开发环境相关服务</a>
           </li>
         
           <li>
             <a href="/2015/04/14/ios8-uitableview-separator-inset-0-not-working/">iOS8下UITableView的分隔线Inset为0不起作用</a>
-          </li>
-        
-          <li>
-            <a href="/2015/02/11/mac-os-install-lxml/">MacOS下安装LXML</a>
-          </li>
-        
-          <li>
-            <a href="/2015/01/21/deploy-flask-using-nginx-gunicorn-supervisor/">使用Nginx、Gunicorn和Supervisor部署Flask应用</a>
-          </li>
-        
-          <li>
-            <a href="/2015/01/19/deploy-flask-using-virtualenv-uwsgi-nginx/">使用Virtualenv,UWSGI和Nginx来搭建Flask</a>
           </li>
         
       </ul>
