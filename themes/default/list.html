@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页-{{.PageData.Title}}</title>
+</head>
+<body>
+    <ul>
+        {{range .Posts}}
+        <li><a href="{{.Location}}">{{.Meta.Title}}</a></li>
+        {{end}}
+    </ul>
+</body>
+</html>

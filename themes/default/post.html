@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {{template "header.html"}}
+    <title>{{.Data.Meta.Title}}-{{.SiteConfig.Title}}</title>
+</head>
+<body>
+<main class="wrapper">
+    {{template "nav.html"}}
+    <section class="container">
+        <h1>{{.Data.Meta.Title}}</h1>
+        <h2>{{.Data.Meta.Date}}</h2>
+        {{.Data.Content}}
+    </section>
+    {{template "footer.html"}}
+</main>
+</body>
+</html>

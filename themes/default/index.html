@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  {{template "header.html"}}
+  <title>H&Y's Blog</title>
+</head>
+
+<body>
+<main class="wrapper">
+  {{template "nav.html"}}
+
+  <section class="container">
+    <h5 class="title">H&Y's Blog</h5>
+    <p>记录H&Y所有一切的博客，包括生活、技术、学习、情感和所有的所有……</p>
+    <ul>
+      {{range .Posts}}
+      <li><a href="{{.Location}}" title="{{.Meta.Title}}">{{.Meta.Title}} at {{.Meta.Date}}</a></li>
+      {{end}}
+    </ul>
+  </section>
+<!--  <section class="container" id="contributing">-->
+<!--    <h5 class="title">Contributing</h5>-->
+<!--    <p>-->
+<!--      Want to contribute? Follow these-->
+<!--      <a-->
+<!--          href="https://github.com/milligram/milligram/blob/master/.github/contributing.md"-->
+<!--          title="Contributing"-->
+<!--      >recommendations</a-->
+<!--      >.-->
+<!--    </p>-->
+<!--  </section>-->
+
+  {{template "footer.html"}}
+</main>
+</body>
+</html>
